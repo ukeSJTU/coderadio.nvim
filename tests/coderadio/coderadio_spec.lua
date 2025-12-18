@@ -3,6 +3,7 @@ describe("coderadio", function()
   local config = require("coderadio.config")
   local utils = require("coderadio.utils")
   local player = require("coderadio.player")
+  local core = require("coderadio.core")
 
   describe("setup", function()
     it("should use default config when no options provided", function()
