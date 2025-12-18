@@ -1,0 +1,287 @@
+*coderadio.txt*  Stream Code Radio in Neovim
+
+==============================================================================
+CONTENTS                                                    *coderadio-contents*
+
+    1. Introduction ............................ |coderadio-introduction|
+    2. Requirements ............................ |coderadio-requirements|
+    3. Installation ............................ |coderadio-installation|
+    4. Commands ................................ |coderadio-commands|
+    5. Configuration ........................... |coderadio-configuration|
+    6. API ..................................... |coderadio-api|
+    7. Statusline .............................. |coderadio-statusline|
+    8. Health Check ............................ |coderadio-health|
+
+==============================================================================
+INTRODUCTION                                            *coderadio-introduction*
+
+coderadio.nvim is a Neovim plugin that allows you to stream freeCodeCamp's
+Code Radio directly in your editor. Code Radio is a 24/7 music station
+playing instrumental music designed for coding.
+
+Features:
+- Stream Code Radio with a single command
+- Real-time song updates via Server-Sent Events (SSE)
+- Floating window with song info and progress bar
+- Statusline integration
+- Cross-platform support (Linux, macOS, Windows)
+- Non-intrusive - no auto-binding keys by default
+
+==============================================================================
+REQUIREMENTS                                            *coderadio-requirements*
+
+- Neovim >= 0.9.0
+- curl (for API requests)
+- One of the following audio players:
+  - mpv (recommended)
+  - ffplay (part of ffmpeg)
+  - VLC
+
+Run |:checkhealth| coderadio to verify your setup.
+
+==============================================================================
+INSTALLATION                                            *coderadio-installation*
+
+Using lazy.nvim: >lua
+    {
+      "ukeSJTU/coderadio.nvim",
+      cmd = { "CodeRadioPlay", "CodeRadioToggle", "CodeRadioInfo" },
+      opts = {},
+    }
+<
+
+Using packer.nvim: >lua
+    use {
+      "ukeSJTU/coderadio.nvim",
+      config = function()
+        require("coderadio").setup()
+      end,
+    }
+<
+
+==============================================================================
+COMMANDS                                                    *coderadio-commands*
+
+                                                              *:CodeRadioPlay*
+:CodeRadioPlay          Start playing Code Radio.
+
+                                                             *:CodeRadioPause*
+:CodeRadioPause         Pause playback. The SSE listener continues running
+                        so song updates are still received.
+
+                                                            *:CodeRadioToggle*
+:CodeRadioToggle        Toggle between play and pause states.
+
+                                                              *:CodeRadioStop*
+:CodeRadioStop          Stop playback completely. Stops the audio player,
+                        SSE listener, and closes any floating windows.
+
+                                                              *:CodeRadioInfo*
+:CodeRadioInfo          Show a floating window with current song information,
+                        progress bar, listener count, and volume.
+                        Press 'q' or <Esc> to close the window.
+                        Press 'p' to toggle pause.
+                        Press '+' or '-' to adjust volume.
+
+                                                          *:CodeRadioVolumeUp*
+:CodeRadioVolumeUp      Increase volume by 10 (max 100).
+
+                                                        *:CodeRadioVolumeDown*
+:CodeRadioVolumeDown    Decrease volume by 10 (min 0).
+
+                                                            *:CodeRadioVolume*
+:CodeRadioVolume {n}    Set volume to {n} (0-100).
+
+==============================================================================
+CONFIGURATION                                          *coderadio-configuration*
+
+Call the setup function with your preferred options: >lua
+
+    require('coderadio').setup({
+      -- Player settings
+      volume = 90,              -- 0-100
+      quality = "normal",       -- "normal" or "low"
+
+      -- UI settings
+      ui = {
+        notifications = {
+          enabled = true,
+          on_song_change = true,
+          on_play = false,
+          on_pause = false,
+        },
+
+        floating_window = {
+          enabled = true,
+          show_on_play = false,
+          show_on_song_change = false,
+          auto_close_delay = 0,   -- 0 = don't auto-close
+          width = 50,
+          border = "rounded",
+        },
+      },
+
+      -- Reconnection settings
+      reconnect = {
+        enabled = true,
+        initial_delay = 1,
+        max_delay = 20,
+        backoff_factor = 2,
+      },
+
+      -- Keymaps (disabled by default)
+      keymaps = {
+        enable = false,
+        toggle = "<leader>rt",
+        pause = "<leader>rp",
+        stop = "<leader>rs",
+        info = "<leader>ri",
+        volume_up = "<leader>r+",
+        volume_down = "<leader>r-",
+      },
+    })
+<
+
+                                                       *coderadio-config-volume*
+volume ~
+    Type: number
+    Default: 90
+    Audio volume level (0-100).
+
+                                                      *coderadio-config-quality*
+quality ~
+    Type: string
+    Default: "normal"
+    Stream quality. Options: "normal" (128kbps) or "low" (64kbps).
+
+                                                *coderadio-config-notifications*
+ui.notifications ~
+    enabled: Enable vim.notify() notifications
+    on_song_change: Notify when song changes
+    on_play: Notify when playback starts
+    on_pause: Notify when playback pauses
+
+                                              *coderadio-config-floating-window*
+ui.floating_window ~
+    enabled: Enable the :CodeRadioInfo command
+    show_on_play: Auto-show window when playback starts
+    show_on_song_change: Auto-show window when song changes
+    auto_close_delay: Seconds before auto-closing (0 = disabled)
+    width: Window width in columns
+    border: Border style ("single", "double", "rounded", "solid", "shadow")
+
+                                                    *coderadio-config-reconnect*
+reconnect ~
+    enabled: Enable automatic reconnection on SSE disconnect
+    initial_delay: Initial reconnect delay in seconds
+    max_delay: Maximum reconnect delay in seconds
+    backoff_factor: Delay multiplier for exponential backoff
+
+                                                      *coderadio-config-keymaps*
+keymaps ~
+    enable: Set to true to auto-bind the default keymaps
+    Individual keys can be customized.
+
+==============================================================================
+API                                                              *coderadio-api*
+
+The following functions are available via `require('coderadio')`:
+
+                                                              *coderadio.play()*
+coderadio.play()
+    Start playing Code Radio.
+
+                                                             *coderadio.pause()*
+coderadio.pause()
+    Pause playback.
+
+                                                            *coderadio.toggle()*
+coderadio.toggle()
+    Toggle play/pause.
+
+                                                              *coderadio.stop()*
+coderadio.stop()
+    Stop playback completely.
+
+                                                         *coderadio.volume_up()*
+coderadio.volume_up()
+    Increase volume by 10.
+
+                                                       *coderadio.volume_down()*
+coderadio.volume_down()
+    Decrease volume by 10.
+
+                                                        *coderadio.set_volume()*
+coderadio.set_volume({vol})
+    Set volume to {vol} (0-100).
+
+                                                         *coderadio.show_info()*
+coderadio.show_info()
+    Open floating window with song info.
+
+                                                         *coderadio.hide_info()*
+coderadio.hide_info()
+    Close floating window.
+
+                                                        *coderadio.is_playing()*
+coderadio.is_playing()
+    Returns boolean indicating if audio is playing.
+
+                                                   *coderadio.get_current_song()*
+coderadio.get_current_song()
+    Returns table with current song info or nil.
+    Fields: id, title, artist, album, art
+
+                                                        *coderadio.get_volume()*
+coderadio.get_volume()
+    Returns current volume level (0-100).
+
+                                                        *coderadio.statusline()*
+coderadio.statusline({opts})
+    Returns formatted string for statusline integration.
+    Options:
+      format: 'full' | 'compact' | 'minimal'
+      show_when_stopped: boolean
+
+==============================================================================
+STATUSLINE                                                *coderadio-statusline*
+
+With lualine.nvim: >lua
+    require('lualine').setup {
+      sections = {
+        lualine_x = {
+          function()
+            return require('coderadio').statusline()
+          end,
+        }
+      }
+    }
+<
+
+With native statusline: >lua
+    vim.opt.statusline = "%f %= %{%v:lua.require('coderadio').statusline()%}"
+<
+
+Format options: >lua
+    -- Full: "󰝚 Artist - Title 2:29/4:18"
+    require('coderadio').statusline({ format = 'full' })
+
+    -- Compact: "󰝚 Title 2:29/4:18"
+    require('coderadio').statusline({ format = 'compact' })
+
+    -- Minimal: "󰝚 2:29/4:18"
+    require('coderadio').statusline({ format = 'minimal' })
+<
+
+==============================================================================
+HEALTH CHECK                                                  *coderadio-health*
+
+Run `:checkhealth coderadio` to verify your setup. The health check will:
+
+- Verify Neovim version
+- Check for curl
+- Detect available audio players
+- Check for optional features (Nerd Fonts, nvim-notify)
+
+==============================================================================
+vim:tw=78:ts=8:ft=help:norl:
