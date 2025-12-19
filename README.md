@@ -6,22 +6,23 @@ Stream [freeCodeCamp's Code Radio](https://coderadio.freecodecamp.org) directly 
 
 - Stream Code Radio with a single command
 - Real-time song updates via Server-Sent Events (SSE)
+- Smooth volume control via mpv IPC (with socat)
 - Floating window with song info and progress bar
 - Statusline integration for popular statusline plugins
 - Cross-platform support (Linux, macOS, Windows)
-- No external dependencies (except audio player)
+- No external dependencies (except mpv and curl)
 - Non-intrusive - no auto-binding keys by default
 
 ## Requirements
 
 - Neovim >= 0.9.0
 - `curl` (for API requests)
-- One of the following audio players:
-  - [mpv](https://mpv.io/) (recommended)
-  - ffplay (part of [ffmpeg](https://ffmpeg.org/))
-  - [VLC](https://www.videolan.org/)
+- [mpv](https://mpv.io/) (audio player)
+- `socat` (optional but recommended for smooth volume control)
 
-### Installing an Audio Player
+### Installation
+
+#### mpv (required)
 
 ```bash
 # macOS
@@ -35,6 +36,21 @@ sudo pacman -S mpv
 
 # Windows (via scoop)
 scoop install mpv
+```
+
+#### socat (optional but recommended)
+
+With `socat` installed, volume changes happen instantly without audio interruption. Without it, volume changes will briefly restart the audio stream.
+
+```bash
+# macOS
+brew install socat
+
+# Ubuntu/Debian
+sudo apt install socat
+
+# Arch Linux
+sudo pacman -S socat
 ```
 
 ## Installation
