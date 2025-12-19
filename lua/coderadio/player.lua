@@ -193,7 +193,7 @@ function M.set_volume_ipc(volume)
 
   -- Send set_property command to mpv
   local success = send_mpv_command({
-    command = { "set_property", "volume", volume }
+    command = { "set_property", "volume", volume },
   })
 
   return success
@@ -208,9 +208,7 @@ end
 ---Check if IPC is available for live volume control
 ---@return boolean
 function M.supports_live_volume()
-  return M.is_socat_available() and
-         job_id ~= nil and
-         vim.fn.filereadable(get_ipc_socket()) == 1
+  return M.is_socat_available() and job_id ~= nil and vim.fn.filereadable(get_ipc_socket()) == 1
 end
 
 ---Restart player with new volume (fallback when IPC unavailable)

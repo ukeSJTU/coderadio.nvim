@@ -210,10 +210,8 @@ function M.start_sse_listener(on_message, on_error, reconnect_config)
         reconnect_state.timer = vim.fn.timer_start(reconnect_state.current_delay * 1000, function()
           reconnect_state.timer = nil
           -- Increase delay for next attempt
-          reconnect_state.current_delay = math.min(
-            reconnect_state.current_delay * reconnect_state.backoff_factor,
-            reconnect_state.max_delay
-          )
+          reconnect_state.current_delay =
+            math.min(reconnect_state.current_delay * reconnect_state.backoff_factor, reconnect_state.max_delay)
           M.start_sse_listener(on_message, on_error, reconnect_config)
         end)
 

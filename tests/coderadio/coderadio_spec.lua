@@ -113,7 +113,7 @@ describe("coderadio", function()
       it("should clamp volume between 0 and 100", function()
         player.set_volume(150)
         assert.equals(100, player.get_volume())
-        
+
         player.set_volume(-10)
         assert.equals(0, player.get_volume())
       end)
