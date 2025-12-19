@@ -31,32 +31,30 @@ function M.check()
     })
   end
 
-  -- Check for audio players
-  vim.health.info("Checking for audio players...")
+  -- Check for mpv (required)
+  vim.health.info("Checking for audio player...")
 
-  local supported_players = player.get_supported_players()
-  local found_player = false
-  local detected_player = player.detect_player()
-
-  for _, p in ipairs(supported_players) do
-    if utils.executable_exists(p) then
-      if p == detected_player then
-        vim.health.ok(p .. " is installed (will be used)")
-      else
-        vim.health.ok(p .. " is installed")
-      end
-      found_player = true
-    else
-      vim.health.info(p .. " not found")
-    end
+  if player.is_mpv_available() then
+    vim.health.ok("mpv is installed")
+  else
+    vim.health.error("mpv not found", {
+      "Install mpv for audio playback:",
+      "  - macOS: brew install mpv",
+      "  - Ubuntu/Debian: sudo apt install mpv",
+      "  - Arch Linux: sudo pacman -S mpv",
+      "  - Windows: scoop install mpv",
+    })
   end
 
-  if not found_player then
-    vim.health.error("No audio player found", {
-      "Install one of the following audio players:",
-      "  - mpv (recommended): brew install mpv / sudo apt install mpv",
-      "  - ffplay (part of ffmpeg): brew install ffmpeg / sudo apt install ffmpeg",
-      "  - vlc: brew install vlc / sudo apt install vlc",
+  -- Check for socat (optional but recommended)
+  if player.is_socat_available() then
+    vim.health.ok("socat is installed (enables smooth volume control)")
+  else
+    vim.health.warn("socat not found (volume changes will restart audio)", {
+      "Install socat for real-time volume control without audio interruption:",
+      "  - macOS: brew install socat",
+      "  - Ubuntu/Debian: sudo apt install socat",
+      "  - Arch Linux: sudo pacman -S socat",
     })
   end
 
