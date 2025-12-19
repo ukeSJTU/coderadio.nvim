@@ -15,6 +15,7 @@ local utils = require("coderadio.utils")
 ---@field elapsed number
 ---@field duration number
 ---@field progress_timer number|nil
+---@field is_restarting boolean
 
 ---Internal state
 ---@type CodeRadio.State
@@ -26,6 +27,7 @@ local state = {
   elapsed = 0,
   duration = 0,
   progress_timer = nil,
+  is_restarting = false,
 }
 
 ---Get UI state object from internal state
@@ -121,6 +123,11 @@ end
 ---@param job_id number
 ---@param exit_code number
 local function on_player_exit(job_id, exit_code)
+  -- If we're restarting (e.g., for volume change), don't treat this as an error
+  if state.is_restarting then
+    return
+  end
+
   if state.is_playing then
     state.is_playing = false
     stop_progress_timer()
@@ -254,50 +261,80 @@ end
 ---Increase volume by 10
 function M.volume_up()
   state.volume = math.min(state.volume + 10, 100)
-  player.set_volume(state.volume)
 
   if state.is_playing then
-    local cfg = config.get()
-    -- Stop player without triggering state change
-    player.stop()
-    -- Restart with new volume after a short delay
-    vim.defer_fn(function()
-      if state.is_playing then -- Check if still supposed to be playing
-        player.start(state.volume, cfg.quality, on_player_exit)
-        utils.notify(string.format("Volume: %d%%", state.volume), vim.log.levels.INFO)
-        -- Update floating window if open
-        if ui.is_floating_window_open() then
-          vim.schedule(function()
-            ui.update_floating_window(get_ui_state())
-          end)
-        end
+    -- Try IPC first for smooth volume change
+    if player.set_volume_ipc(state.volume) then
+      utils.notify(string.format("Volume: %d%%", state.volume), vim.log.levels.INFO)
+      -- Update floating window if open
+      if ui.is_floating_window_open() then
+        vim.schedule(function()
+          ui.update_floating_window(get_ui_state())
+        end)
       end
-    end, 100)
+    else
+      -- Fallback to restart if IPC not available
+      player.set_volume(state.volume)
+      local cfg = config.get()
+      state.is_restarting = true
+      player.stop()
+      vim.defer_fn(function()
+        if state.is_playing then
+          player.start(state.volume, cfg.quality, on_player_exit)
+          state.is_restarting = false
+          utils.notify(string.format("Volume: %d%%", state.volume), vim.log.levels.INFO)
+          if ui.is_floating_window_open() then
+            vim.schedule(function()
+              ui.update_floating_window(get_ui_state())
+            end)
+          end
+        else
+          state.is_restarting = false
+        end
+      end, 100)
+    end
+  else
+    player.set_volume(state.volume)
   end
 end
 
 ---Decrease volume by 10
 function M.volume_down()
   state.volume = math.max(state.volume - 10, 0)
-  player.set_volume(state.volume)
 
   if state.is_playing then
-    local cfg = config.get()
-    -- Stop player without triggering state change
-    player.stop()
-    -- Restart with new volume after a short delay
-    vim.defer_fn(function()
-      if state.is_playing then -- Check if still supposed to be playing
-        player.start(state.volume, cfg.quality, on_player_exit)
-        utils.notify(string.format("Volume: %d%%", state.volume), vim.log.levels.INFO)
-        -- Update floating window if open
-        if ui.is_floating_window_open() then
-          vim.schedule(function()
-            ui.update_floating_window(get_ui_state())
-          end)
-        end
+    -- Try IPC first for smooth volume change
+    if player.set_volume_ipc(state.volume) then
+      utils.notify(string.format("Volume: %d%%", state.volume), vim.log.levels.INFO)
+      -- Update floating window if open
+      if ui.is_floating_window_open() then
+        vim.schedule(function()
+          ui.update_floating_window(get_ui_state())
+        end)
       end
-    end, 100)
+    else
+      -- Fallback to restart if IPC not available
+      player.set_volume(state.volume)
+      local cfg = config.get()
+      state.is_restarting = true
+      player.stop()
+      vim.defer_fn(function()
+        if state.is_playing then
+          player.start(state.volume, cfg.quality, on_player_exit)
+          state.is_restarting = false
+          utils.notify(string.format("Volume: %d%%", state.volume), vim.log.levels.INFO)
+          if ui.is_floating_window_open() then
+            vim.schedule(function()
+              ui.update_floating_window(get_ui_state())
+            end)
+          end
+        else
+          state.is_restarting = false
+        end
+      end, 100)
+    end
+  else
+    player.set_volume(state.volume)
   end
 end
 
@@ -305,25 +342,40 @@ end
 ---@param vol number Volume 0-100
 function M.set_volume(vol)
   state.volume = math.max(0, math.min(100, vol))
-  player.set_volume(state.volume)
 
   if state.is_playing then
-    local cfg = config.get()
-    -- Stop player without triggering state change
-    player.stop()
-    -- Restart with new volume after a short delay
-    vim.defer_fn(function()
-      if state.is_playing then -- Check if still supposed to be playing
-        player.start(state.volume, cfg.quality, on_player_exit)
-        utils.notify(string.format("Volume: %d%%", state.volume), vim.log.levels.INFO)
-        -- Update floating window if open
-        if ui.is_floating_window_open() then
-          vim.schedule(function()
-            ui.update_floating_window(get_ui_state())
-          end)
-        end
+    -- Try IPC first for smooth volume change
+    if player.set_volume_ipc(state.volume) then
+      utils.notify(string.format("Volume: %d%%", state.volume), vim.log.levels.INFO)
+      -- Update floating window if open
+      if ui.is_floating_window_open() then
+        vim.schedule(function()
+          ui.update_floating_window(get_ui_state())
+        end)
       end
-    end, 100)
+    else
+      -- Fallback to restart if IPC not available
+      player.set_volume(state.volume)
+      local cfg = config.get()
+      state.is_restarting = true
+      player.stop()
+      vim.defer_fn(function()
+        if state.is_playing then
+          player.start(state.volume, cfg.quality, on_player_exit)
+          state.is_restarting = false
+          utils.notify(string.format("Volume: %d%%", state.volume), vim.log.levels.INFO)
+          if ui.is_floating_window_open() then
+            vim.schedule(function()
+              ui.update_floating_window(get_ui_state())
+            end)
+          end
+        else
+          state.is_restarting = false
+        end
+      end, 100)
+    end
+  else
+    player.set_volume(state.volume)
   end
 end
 
