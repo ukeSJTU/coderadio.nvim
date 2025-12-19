@@ -1,7 +1,8 @@
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:  # Temporarily disable automatic docs generation
+  # push:
+  #   branches:
+  #     - main
 name: docs
 
 jobs:
