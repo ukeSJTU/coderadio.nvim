@@ -1,24 +1,45 @@
 # coderadio.nvim
 
+![Neovim](https://img.shields.io/badge/Neovim-0.9+-green.svg?style=flat-square&logo=neovim)
+![Lua](https://img.shields.io/badge/Lua-5.1+-blue.svg?style=flat-square&logo=lua)
+![License](https://img.shields.io/badge/license-MIT-orange.svg?style=flat-square)
+![Version](https://img.shields.io/badge/version-1.0.0-purple.svg?style=flat-square)
+
 Stream [freeCodeCamp's Code Radio](https://coderadio.freecodecamp.org) directly in Neovim. Listen to 24/7 music designed for coding while you work.
+
+## ✨ Quick Start
+
+```lua
+-- Install with lazy.nvim
+{
+  "ukeSJTU/coderadio.nvim",
+  cmd = { "CodeRadioPlay", "CodeRadioToggle", "CodeRadioInfo" },
+  opts = {},
+}
+```
+
+```vim
+:CodeRadioPlay  " Start listening!
+:CodeRadioInfo  " Show song info
+```
 
 ## Features
 
-- Stream Code Radio with a single command
-- Real-time song updates via Server-Sent Events (SSE)
-- Smooth volume control via mpv IPC (with socat)
-- Floating window with song info and progress bar
-- Statusline integration for popular statusline plugins
-- Cross-platform support (Linux, macOS, Windows)
-- No external dependencies (except mpv and curl)
-- Non-intrusive - no auto-binding keys by default
+-   Stream Code Radio with a single command
+-   Real-time song updates via Server-Sent Events (SSE)
+-   Smooth volume control via mpv IPC (with socat)
+-   Floating window with song info and progress bar
+-   Statusline integration for popular statusline plugins
+-   Cross-platform support (Linux, macOS, Windows)
+-   No external dependencies (except mpv and curl)
+-   Non-intrusive - no auto-binding keys by default
 
 ## Requirements
 
-- Neovim >= 0.9.0
-- `curl` (for API requests)
-- [mpv](https://mpv.io/) (audio player)
-- `socat` (optional but recommended for smooth volume control)
+-   Neovim >= 0.9.0
+-   `curl` (for API requests)
+-   [mpv](https://mpv.io/) (audio player)
+-   `socat` (optional but recommended for smooth volume control)
 
 ### Installation
 
@@ -92,16 +113,16 @@ require("coderadio").setup()
 
 ### Commands
 
-| Command | Description |
-|---------|-------------|
-| `:CodeRadioPlay` | Start playing Code Radio |
-| `:CodeRadioPause` | Pause playback (keeps receiving song updates) |
-| `:CodeRadioToggle` | Toggle play/pause |
-| `:CodeRadioStop` | Stop playback completely |
-| `:CodeRadioInfo` | Show floating window with song info |
-| `:CodeRadioVolumeUp` | Increase volume by 10 |
-| `:CodeRadioVolumeDown` | Decrease volume by 10 |
-| `:CodeRadioVolume <n>` | Set volume to n (0-100) |
+| Command                | Description                                   |
+| ---------------------- | --------------------------------------------- |
+| `:CodeRadioPlay`       | Start playing Code Radio                      |
+| `:CodeRadioPause`      | Pause playback (keeps receiving song updates) |
+| `:CodeRadioToggle`     | Toggle play/pause                             |
+| `:CodeRadioStop`       | Stop playback completely                      |
+| `:CodeRadioInfo`       | Show floating window with song info           |
+| `:CodeRadioVolumeUp`   | Increase volume by 10                         |
+| `:CodeRadioVolumeDown` | Decrease volume by 10                         |
+| `:CodeRadioVolume <n>` | Set volume to n (0-100)                       |
 
 ### Keymaps
 
@@ -239,15 +260,23 @@ coderadio.get_volume()     -- Returns current volume (0-100)
 coderadio.statusline(opts) -- Returns formatted string
 ```
 
-## Health Check
+## 🏥 Health Check
 
 Run `:checkhealth coderadio` to verify your setup and diagnose any issues.
 
-## Credits
+## 📝 Changelog
 
-- [freeCodeCamp](https://www.freecodecamp.org/) for Code Radio
-- Inspired by [code-radio-cli](https://github.com/JasonWei512/code-radio-cli)
+See [CHANGELOG.md](CHANGELOG.md) for release history and updates.
 
-## License
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit issues or pull requests.
+
+## 💡 Credits
+
+-   [freeCodeCamp](https://www.freecodecamp.org/) for Code Radio
+-   Inspired by [code-radio-cli](https://github.com/JasonWei512/code-radio-cli)
+
+## 📄 License
 
 MIT License - see [LICENSE](LICENSE) for details.
