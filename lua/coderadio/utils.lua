@@ -109,6 +109,7 @@ end
 ---@return function
 function M.debounce(fn, ms)
   local timer = nil
+  local unpack = table.unpack or unpack  ---@diagnostic disable-line: deprecated
   return function(...)
     local args = { ... }
     if timer then

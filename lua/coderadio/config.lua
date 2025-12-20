@@ -87,8 +87,8 @@ M.defaults = {
   },
 }
 
----@type CodeRadio.Config
-M.options = {}
+---@type CodeRadio.Config?
+M.options = {} ---@diagnostic disable-line: missing-fields
 
 ---Setup configuration with user options
 ---@param opts CodeRadio.Config?
